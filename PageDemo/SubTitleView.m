@@ -161,7 +161,7 @@
             CGFloat btnPosition = btn.frame.origin.x + btn.frame.size.width + 20;
             if (btnPosition > screenWidthPCH) {
                 
-                self.scrollView.contentOffset = CGPointMake(btnPosition - screenWidthPCH, 0);
+                self.scrollView.contentOffset = CGPointMake(self.scrollView.contentSize.width - screenWidthPCH, 0);
             }
             
             if (btn.frame.origin.x - self.scrollView.contentOffset.x <0) {
