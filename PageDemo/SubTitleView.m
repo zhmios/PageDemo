@@ -22,8 +22,8 @@
 
 #define Hex(rgbValue) ([UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0])
 
-#define EDGE_SPACE 30
-#define ITEM_SPACE 33
+#define EDGE_SPACE 23
+#define ITEM_SPACE 32
 @interface SubTitleView ()
 
 /**
@@ -86,9 +86,21 @@
 {
     [self addSubview:self.scrollView];
     
-    // 计算每个titleView的宽度
-//    CGFloat width = screenWidthPCH / _titleArray.count;
-    CGFloat btnPosition = EDGE_SPACE;
+    CGFloat edgeSpace = EDGE_SPACE;
+    CGFloat itemSpace = ITEM_SPACE;
+    
+    if (screenWidthPCH == 320) {
+        edgeSpace = 20;
+        itemSpace = 20;
+        
+    }
+    
+    if (screenWidthPCH == 375) {
+        edgeSpace = 20;
+        itemSpace = 20;
+    }
+
+    CGFloat btnPosition = edgeSpace;
     for (NSInteger index = 0; index < _titleArray.count; index++) {
         NSString *title = [_titleArray objectAtIndex:index];
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -98,7 +110,7 @@
         [btn setTitleColor:kSystemOriginColor forState:UIControlStateHighlighted | UIControlStateSelected];
         CGFloat btnWidth = [self calculateTitleSize:title].width;
         btn.frame = CGRectMake(btnPosition, 0, btnWidth, 38);
-        btnPosition += btnWidth + ITEM_SPACE;
+        btnPosition += btnWidth + itemSpace;
         btn.titleLabel.font = [UIFont systemFontOfSize:15];
         btn.adjustsImageWhenHighlighted = NO;
         [btn addTarget:self action:@selector(subTitleBtnClick:) forControlEvents:UIControlEventTouchUpInside];
@@ -106,11 +118,10 @@
         [self.scrollView addSubview:btn];
         if (index == _titleArray.count -1) {
          
-            self.scrollView.contentSize = CGSizeMake(btnPosition - ITEM_SPACE + EDGE_SPACE, self.frame.size.height);
+            self.scrollView.contentSize = CGSizeMake(btnPosition - itemSpace + edgeSpace, self.frame.size.height);
         }
     }
     
-//
     UIButton *firstBtn = [self.subTitleButtonArray firstObject];
     [self selectedAtButton:firstBtn isFirstStart:YES];
 }
@@ -142,13 +153,21 @@
         
     }];
     
-    
-//    [self.sliderView mas_updateConstraints:^(MASConstraintMaker *make) {
-//        make.left.equalTo(self.mas_left).offset(btn.frame.origin.x + btn.frame.size.width / 2.0 - 42);
-//    }];
     if(!first) {
+        
+       
         [UIView animateWithDuration:0.25 animations:^{
             [self layoutIfNeeded];
+            CGFloat btnPosition = btn.frame.origin.x + btn.frame.size.width + 20;
+            if (btnPosition > screenWidthPCH) {
+                
+                self.scrollView.contentOffset = CGPointMake(btnPosition - screenWidthPCH, 0);
+            }
+            
+            if (btn.frame.origin.x - self.scrollView.contentOffset.x <0) {
+                
+                self.scrollView.contentOffset = CGPointMake(0, 0);
+            }
         }];
     }
     
@@ -191,26 +210,6 @@
     return _subTitleButtonArray;
 }
 
-/**
- *  按钮下面的标示滑块
- **/
-//- (UIView *)sliderView
-//{
-//    if (!_sliderView) {
-//        UIView *view = [[UIView alloc] init];
-//        view.backgroundColor = kSystemOriginColor;
-//        [self.scrollView addSubview:view];
-//        
-//        
-//        [view mas_makeConstraints:^(MASConstraintMaker *make) {
-//            make.size.mas_equalTo(CGSizeMake(80, 2));
-//            make.bottom.equalTo(self.mas_bottom);
-//            make.left.equalTo(self.mas_left).offset(0);
-//        }];
-//        _sliderView = view;
-//    }
-//    return _sliderView;
-//}
 
 - (UIView *)sliderView{
 
