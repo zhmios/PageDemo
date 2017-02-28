@@ -27,9 +27,9 @@
     [super viewDidLoad];
     [self.view addSubview:self.subTitleView];
     [self configSubViews];
-    for (UIGestureRecognizer *recognizer in self.pageViewController.gestureRecognizers) {
-        recognizer.enabled = NO;
-    }
+//    for (UIGestureRecognizer *recognizer in self.pageViewController.gestureRecognizers) {
+//        recognizer.enabled = NO;
+//    }
 }
 
 - (void)configSubViews
@@ -93,8 +93,8 @@
 {
     if (!_pageViewController) {
         NSDictionary *options = [NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:UIPageViewControllerSpineLocationNone] forKey:UIPageViewControllerOptionSpineLocationKey];
-        UIPageViewController *page = [[UIPageViewController alloc] initWithTransitionStyle:UIPageViewControllerTransitionStylePageCurl navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal options:options];
-//        page.delegate = self;
+        UIPageViewController *page = [[UIPageViewController alloc] initWithTransitionStyle:UIPageViewControllerTransitionStyleScroll  navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal options:options];
+        page.delegate = self;
         page.dataSource = self;
         
         [page setViewControllers:@[[self.controllers firstObject]] direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:nil];
