@@ -21,6 +21,9 @@
 #define kNavigationBarColor [UIColor colorWithRed:225.0/255 green:65.0/255 blue:56.0/255 alpha:1.00f]
 
 #define Hex(rgbValue) ([UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0])
+
+#define EDGE_SPACE 30
+#define ITEM_SPACE 33
 @interface SubTitleView ()
 
 /**
@@ -35,9 +38,26 @@
 
 @property (nonatomic, strong) UIButton *currentSelectedButton;
 
+@property (nonatomic, strong) UIScrollView *scrollView;
+
 @end
 
 @implementation SubTitleView
+
+
+- (UIScrollView *)scrollView{
+
+    if (_scrollView == nil) {
+        
+        _scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, screenWidthPCH, self.frame.size.height)];
+        
+//        _scrollView.backgroundColor = [UIColor redColor];
+        _scrollView.showsHorizontalScrollIndicator = NO;
+        
+    }
+
+    return _scrollView;
+}
 
 - (instancetype)init
 {
@@ -64,9 +84,11 @@
 
 - (void)configSubTitles
 {
-    // 计算每个titleView的宽度
-    CGFloat width = screenWidthPCH / _titleArray.count;
+    [self addSubview:self.scrollView];
     
+    // 计算每个titleView的宽度
+//    CGFloat width = screenWidthPCH / _titleArray.count;
+    CGFloat btnPosition = EDGE_SPACE;
     for (NSInteger index = 0; index < _titleArray.count; index++) {
         NSString *title = [_titleArray objectAtIndex:index];
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -74,18 +96,31 @@
         [btn setTitleColor:kSystemOriginColor forState:UIControlStateSelected];
         [btn setTitleColor:kSystemBlackColor forState:UIControlStateNormal];
         [btn setTitleColor:kSystemOriginColor forState:UIControlStateHighlighted | UIControlStateSelected];
-//        btn.backgroundColor = [z]
-        btn.frame = CGRectMake(width * index, 0, width, 38);
-        
-        btn.titleLabel.font = [UIFont systemFontOfSize:12];
+        CGFloat btnWidth = [self calculateTitleSize:title].width;
+        btn.frame = CGRectMake(btnPosition, 0, btnWidth, 38);
+        btnPosition += btnWidth + ITEM_SPACE;
+        btn.titleLabel.font = [UIFont systemFontOfSize:15];
         btn.adjustsImageWhenHighlighted = NO;
         [btn addTarget:self action:@selector(subTitleBtnClick:) forControlEvents:UIControlEventTouchUpInside];
         [self.subTitleButtonArray addObject:btn];
-        [self addSubview:btn];
+        [self.scrollView addSubview:btn];
+        if (index == _titleArray.count -1) {
+         
+            self.scrollView.contentSize = CGSizeMake(btnPosition - ITEM_SPACE + EDGE_SPACE, self.frame.size.height);
+        }
     }
     
+//
     UIButton *firstBtn = [self.subTitleButtonArray firstObject];
     [self selectedAtButton:firstBtn isFirstStart:YES];
+}
+
+- (CGSize)calculateTitleSize:(NSString *)title{
+
+    NSDictionary *attrs = @{NSFontAttributeName : [UIFont boldSystemFontOfSize:15]};
+    CGSize size=[title sizeWithAttributes:attrs];
+
+    return size;
 }
 
 #pragma mark - action
@@ -96,9 +131,21 @@
 - (void)selectedAtButton:(UIButton *)btn isFirstStart:(BOOL)first{
     btn.selected = YES;
     self.currentSelectedButton = btn;
-    [self.sliderView mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.mas_left).offset(btn.frame.origin.x + btn.frame.size.width / 2.0 - 42);
+    
+    [self.sliderView mas_remakeConstraints:^(MASConstraintMaker *make) {
+       
+        make.left.equalTo(btn.mas_left);
+        make.right.equalTo(btn.mas_right);
+        make.bottom.equalTo(self.scrollView.mas_bottom).offset(self.frame.size.height);
+        make.height.equalTo(@2);
+        
+        
     }];
+    
+    
+//    [self.sliderView mas_updateConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(self.mas_left).offset(btn.frame.origin.x + btn.frame.size.width / 2.0 - 42);
+//    }];
     if(!first) {
         [UIView animateWithDuration:0.25 animations:^{
             [self layoutIfNeeded];
@@ -147,23 +194,43 @@
 /**
  *  按钮下面的标示滑块
  **/
-- (UIView *)sliderView
-{
+//- (UIView *)sliderView
+//{
+//    if (!_sliderView) {
+//        UIView *view = [[UIView alloc] init];
+//        view.backgroundColor = kSystemOriginColor;
+//        [self.scrollView addSubview:view];
+//        
+//        
+//        [view mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.size.mas_equalTo(CGSizeMake(80, 2));
+//            make.bottom.equalTo(self.mas_bottom);
+//            make.left.equalTo(self.mas_left).offset(0);
+//        }];
+//        _sliderView = view;
+//    }
+//    return _sliderView;
+//}
+
+- (UIView *)sliderView{
+
     if (!_sliderView) {
-        UIView *view = [[UIView alloc] init];
-        view.backgroundColor = kSystemOriginColor;
-        [self addSubview:view];
         
-        
-        [view mas_makeConstraints:^(MASConstraintMaker *make) {
+        _sliderView = [[UIView alloc]init];
+        _sliderView.backgroundColor = kSystemOriginColor;
+        [self.scrollView addSubview:_sliderView];
+        [_sliderView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.scrollView.mas_left).offset(30);
             make.size.mas_equalTo(CGSizeMake(80, 2));
-            make.bottom.equalTo(self.mas_bottom);
-            make.left.equalTo(self.mas_left).offset(0);
+            make.bottom.equalTo(self.scrollView.mas_bottom);
+            
+            
         }];
-        _sliderView = view;
+        
+        
     }
     return _sliderView;
-}
 
+}
 
 @end
